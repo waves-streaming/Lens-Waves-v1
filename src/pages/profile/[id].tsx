@@ -9,6 +9,7 @@ import {
   LENS_CONTRACT_ADDRESS,
 } from "../../const/contracts";
 import { useFollow } from "../../lib/useFollow";
+import { Card, Image, Avatar, Group, Text, Space, Divider} from "@mantine/core";
 
 type Props = {};
 
@@ -53,52 +54,86 @@ export default function ProfilePage({}: Props) {
     return <div>Could not find this profile.</div>;
   }
 
-  if (loadingProfile) {
-    return <div>Loading profile...</div>;
-  }
+  const replaceURLs = (text: string) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const atSymbolRegex = /(\S*@+\S*)/g;
+
+    return text
+      .replace(urlRegex, (url: string) => `<a href="${url}" target="_blank">${url}</a>`)
+      .replace(atSymbolRegex, (match: string) => ` ${match} `);
+  };
 
   return (
     <div className={styles.profileContainer}>
-      <div className={styles.profileContentContainer}>
-        {/* Cover Image */}
+       <Card shadow="sm" padding="lg" radius="md" withBorder>
+       <Card.Section>
         {/* @ts-ignore */}
-        {profileData?.profile?.coverPicture?.original?.url && (
-          <MediaRenderer
-            // @ts-ignore
+          <Image
+           // @ts-ignore
             src={profileData?.profile?.coverPicture?.original?.url || ""}
             alt={
               profileData?.profile?.name || profileData?.profile?.handle || ""
             }
-            className={styles.coverImageContainer}
+            height={200}
+            fallbackSrc="https://www.hdwallpaper.nu/wp-content/uploads/2015/07/Ocean-wave-stock-image_WEB.jpg"
           />
-        )}
-        {/* Profile Picture */}
-        {/* @ts-ignore */}
-        {profileData?.profile?.picture?.original?.url && (
-          <MediaRenderer
+        </Card.Section>
+        
+        
+    
+          <Avatar
             // @ts-ignore
-            src={profileData.profile.picture.original.url}
-            alt={profileData.profile.name || profileData.profile.handle || ""}
-            className={styles.profilePictureContainer}
+            src={profileData?.profile?.picture?.original?.url}
+            alt={profileData?.profile?.name || profileData?.profile?.handle || ""}
+            className={styles.avatar}
+            size={80}
+        radius={80}
+        mx="auto"
+        mt={-30}
           />
-        )}
-
-        {/* Profile Name */}
-        <h1 className={styles.profileName}>
-          {profileData?.profile?.name || "Anon User"}
-        </h1>
-        {/* Profile Handle */}
-        <p className={styles.profileHandle}>
+      
+{/* Profile Handle */}
+<Group justify="center" className={styles.profileHandle}>
           @{profileData?.profile?.handle || "anonuser"}
-        </p>
+        </Group>
+        {/* Profile Name */}
+        <Group justify="center" className={styles.profileName}>
+          <Text c="dimmed" fw={500}>{profileData?.profile?.name || "Anon User"}</Text>
+        </Group>
+        
+<Space h="md"/>
+      
+        <Text
+        align="center"
+            fz="sm"
+            style={{
+              maxWidth: "100%",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "wrap",
+            }}
+            dangerouslySetInnerHTML={{
+              __html:
+              profileData && profileData.profile && profileData.profile.bio 
+                  ? replaceURLs(profileData.profile.bio.replace(/\n/g, "<br> "))
+                  : "",
+            }}
+          />
+<Space h="xl"/>
+      <Group justify="center">
 
-        {/* Profile Description */}
-        <p className={styles.profileDescription}>{profileData?.profile?.bio}</p>
-
-        <p className={styles.followerCount}>
+      
+      <Text fw={500} fz="sm">
           {profileData?.profile?.stats.totalFollowers} {" Followers"}
-        </p>
+        </Text>
+       
+          <Text fw={500} fz="sm">
+          {profileData?.profile?.stats.totalFollowing} {" Following"}
+        </Text>
+        </Group>
 
+        <Space h="md"/>
+        <Group justify="center"> 
         <Web3Button
           contractAddress={LENS_CONTRACT_ADDRESS}
           contractAbi={LENS_CONTRACT_ABI}
@@ -106,7 +141,10 @@ export default function ProfilePage({}: Props) {
         >
           Follow User
         </Web3Button>
+        </Group>
 
+        </Card>
+        <Space h="md"/>
         <div className={styles.publicationsContainer}>
           {isLoadingPublications ? (
             <div>Loading Publications...</div>
@@ -116,8 +154,9 @@ export default function ProfilePage({}: Props) {
               <FeedPost publication={publication} key={publication.id} />
             ))
           )}
-        </div>
+        
       </div>
+     
     </div>
   );
 }

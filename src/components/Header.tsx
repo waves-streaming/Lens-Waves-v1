@@ -16,7 +16,7 @@ export default function Header() {
         </div>
 
         <div className={styles.right}>
-          <SignInButton />
+          
         </div>
       </div>
       <div style={{ height: 64 }} />
